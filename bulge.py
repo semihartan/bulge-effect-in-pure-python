@@ -21,7 +21,7 @@ class BulgeOptions:
 
 class BulgeEffect:
     INTERP_TYPES = [cv2.INTER_NEAREST, cv2.INTER_LINEAR, cv2.INTER_CUBIC, cv2.INTER_LANCZOS4]
-    def __init__(self, img, options=None): 
+    def __init__(self, img, multithread=False, options=None): 
         self._map_x = None
         self._map_y = None
         self._img = img
@@ -30,9 +30,8 @@ class BulgeEffect:
         if options is None:
             options = BulgeOptions(50, 50, 50)
         self._options = options
-        self._worker_count = 1
+        self._worker_count = 1 if not multithread else os.cpu_count()
         self._divisors = self._closest_divisors(self._worker_count)
-        # os.environ['TF_CONFIG'] = json.dump(tf_config)
     
     @property
     def amount(self):
@@ -166,7 +165,7 @@ def on_mouse_move(x, y, button):
     if img is None:
         return
     
-    bulge_effect.set_options(BulgeOptions(x, y, 200, scale=0.9, amount=1.4, quality=BulgeQuality.NORMAL))
+    bulge_effect.set_options(BulgeOptions(x, y, 200, scale=1.2, amount=1.4, quality=BulgeQuality.NORMAL))
     bulge_effect.apply() 
 
     cv2.imshow("buldge", bulge_effect.image) 
@@ -191,11 +190,7 @@ def mouse_event_handler(event, x, y, flags, param):
 if __name__ == "__main__":
     global img, bulge_effect
     img = cv2.imread('test6.png')
-    _map_y, _map_x = np.mgrid[0:10, 0:5].astype(np.float32)
     
-    bulge_effect = BulgeEffect(img)
-    bulge_effect.set_options(BulgeOptions(50, 50, 50, scale=-0.4, amount=1.4, quality=BulgeQuality.NORMAL))
-    bulge_effect.apply() 
     cv2.imshow('buldge', img)
     cv2.setMouseCallback('buldge', mouse_event_handler)
     
